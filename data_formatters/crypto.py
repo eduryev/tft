@@ -207,7 +207,7 @@ class CryptoFormatter(GenericDataFormatter):
     fixed_params = {
         'total_time_steps': 252 + 5,
         'num_encoder_steps': 252,
-        'num_epochs': 10,
+        'num_epochs': 1,
         'early_stopping_patience': 5,
         'multiprocessing_workers': 5,
     }
