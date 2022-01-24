@@ -48,11 +48,16 @@ class CryptoFormatter(GenericDataFormatter):
       ('Close', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
       ('Volume', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
       ('VWAP', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
+      ('log_return', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
       ('Weight', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
       ('days_from_start', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
-      # ('day_of_week', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
-      # ('day_of_month', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
-      # ('week_of_year', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      ('hours_from_start', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+      ('hour_of_day', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      ('minute_of_day', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      ('minute_of_hour', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      ('day_of_week', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      ('day_of_month', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      ('week_of_year', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
       ('year', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
       ('month', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
       ('categorical_id', DataTypes.CATEGORICAL, InputTypes.STATIC_INPUT)
@@ -69,14 +74,16 @@ class CryptoFormatter(GenericDataFormatter):
 
   def split_data(self,
                  df,
-                 start_boundary=1,
-                 valid_boundary=2,
-                 test_boundary=3,
-                 end_boundary=4):
+                 start_boundary=0,
+                 valid_boundary=1000,
+                 test_boundary=1150,
+                 end_boundary=1358):
     """Splits data frame into training-validation-test data frames.
     
-    There are 1358 days of data in total. 1000 of them is used for train,
-    150 for validation and the rest 208 for test.
+    There are 1358 days of data in total.
+    1000 of them is used for train,
+    150 for validation,
+    and the rest 208 for test.
 
     This also calibrates scaling object, and transforms data for each split.
 
@@ -208,9 +215,9 @@ class CryptoFormatter(GenericDataFormatter):
     """Returns fixed model parameters for experiments."""
 
     fixed_params = {
-        'total_time_steps': 10 + 5,  # 252 + 5,
-        'num_encoder_steps': 10,  # 252,
-        'num_epochs': 1,
+        'total_time_steps': 288 + 1,  # 252 + 5,
+        'num_encoder_steps': 288,  # 252,
+        'num_epochs': 50,
         'early_stopping_patience': 5,
         'multiprocessing_workers': 5,
     }
@@ -222,7 +229,7 @@ class CryptoFormatter(GenericDataFormatter):
 
     model_params = {
         'dropout_rate': 0.3,
-        'hidden_layer_size': 80,
+        'hidden_layer_size': 160,
         'learning_rate': 0.01,
         'minibatch_size': 64,
         'max_gradient_norm': 0.01,
