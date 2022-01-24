@@ -124,6 +124,7 @@ class CryptoFormatter(GenericDataFormatter):
 
     data = df[real_inputs].values
     self._real_scalers = sklearn.preprocessing.StandardScaler().fit(data)
+    print(f"Target scaled is fit on dataframe shape: {df[[target_column]].values.shape}")
     self._target_scaler = sklearn.preprocessing.StandardScaler().fit(
         df[[target_column]].values)  # used for predictions
 
@@ -197,7 +198,7 @@ class CryptoFormatter(GenericDataFormatter):
 
     for col in column_names:
       if col not in {'forecast_time', 'identifier'}:
-        output[col] = self._target_scaler.inverse_transform(predictions[col])
+        output[col] = self._target_scaler.inverse_transform(predictions[[col]])
 
     return output
 
