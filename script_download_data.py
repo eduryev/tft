@@ -187,6 +187,24 @@ def download_volatility(config):
   print('Done.')
 
 
+def pre_process_raw_crypto_data(raw_data):
+    def log_return(series, periods=1):
+        return np.log(series).diff(periods=periods)
+
+    asset_details = pd.read_csv('../asset_details.csv')
+
+    assets_df_list = []
+    for asset_id, asset_name in zip(asset_details.Asset_ID, asset_details.Asset_Name):
+        asset = raw_data[raw_data["Asset_ID"] == asset_id].set_index('timestamp')
+        asset = asset.reindex(range(asset.index[0], asset.index[-1] + 60, 60), method='pad')
+        asset_log_ret = log_return(asset.Close.fillna(0), 15).fillna(0)
+        asset['log_return'] = asset_log_ret
+        assets_df_list.append(asset)
+
+    assets_df = pd.concat(assets_df_list)
+    assets_df = assets_df.join(asset_details.set_index('Asset_ID'), on='Asset_ID', how='left')
+    return assets_df
+
 # Dataset specific download routines.
 def download_crypto(config):
   """Downloads crypto data."""
@@ -195,14 +213,11 @@ def download_crypto(config):
 
   data_folder = config.data_folder
   csv_path = '../train/train.csv'
-#   csv_path = os.path.join(data_folder, 'oxfordmanrealizedvolatilityindices.csv')
-#   zip_path = os.path.join(data_folder, 'oxfordmanrealizedvolatilityindices.zip')
 
-#   download_and_unzip(url, zip_path, csv_path, data_folder)
-
-#   print('Unzip complete. Adding extra inputs')
-
-  df = pd.read_csv(csv_path, index_col=0)  # no explicit index
+  df = pd.read_csv(csv_path)  # no explicit index
+  df = pre_process_raw_crypto_data(df)
+  with pd.option_context('mode.use_inf_as_null', True):
+      df = df.dropna()
 
   # Adds additional date/day fields
 #   idx = [str(s).split('+')[0] for s in df.index
