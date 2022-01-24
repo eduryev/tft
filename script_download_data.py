@@ -191,7 +191,7 @@ def pre_process_raw_crypto_data(raw_data):
     def log_return(series, periods=1):
         return np.log(series).diff(periods=periods)
 
-    asset_details = pd.read_csv('../asset_details.csv')
+    asset_details = pd.read_csv('train/asset_details.csv')
 
     assets_df_list = []
     for asset_id, asset_name in zip(asset_details.Asset_ID, asset_details.Asset_Name):
@@ -212,7 +212,7 @@ def download_crypto(config):
 #   url = 'https://realized.oxford-man.ox.ac.uk/images/oxfordmanrealizedvolatilityindices.zip'
 
   data_folder = config.data_folder
-  csv_path = '../train/train.csv'
+  csv_path = 'train/train.csv'
 
   df = pd.read_csv(csv_path)  # no explicit index
   df = pre_process_raw_crypto_data(df)

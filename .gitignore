@@ -1,3 +1,7 @@
 /venv/
 .idea/
 output/
+__pycache__
+notebooks/
+train/
+.DS_Store

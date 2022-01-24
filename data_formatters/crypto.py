@@ -69,10 +69,10 @@ class CryptoFormatter(GenericDataFormatter):
 
   def split_data(self,
                  df,
-                 start_boundary=100,
-                 valid_boundary=101,
-                 test_boundary=102,
-                 end_boundary=103):
+                 start_boundary=1,
+                 valid_boundary=2,
+                 test_boundary=3,
+                 end_boundary=4):
     """Splits data frame into training-validation-test data frames.
     
     There are 1358 days of data in total. 1000 of them is used for train,
@@ -91,7 +91,7 @@ class CryptoFormatter(GenericDataFormatter):
 
     print('Formatting train-valid-test splits.')
 
-    index = df['days_from_start']
+    index = df['hours_from_start']
     train = df.loc[(index >= start_boundary) & (index < valid_boundary)]
     valid = df.loc[(index >= valid_boundary) & (index < test_boundary)]
     test = df.loc[(index >= test_boundary) & (index < end_boundary)]
@@ -197,9 +197,10 @@ class CryptoFormatter(GenericDataFormatter):
     column_names = predictions.columns
 
     for col in column_names:
-      if col not in {'forecast_time', 'identifier'}:
+      if col not in {'forecast_time', 'identifier', 'weights'}:
         output[col] = self._target_scaler.inverse_transform(predictions[[col]])
-
+      elif col == 'weights':
+        output[col] = self._real_scalers.inverse_transform(predictions[[col]])
     return output
 
   # Default params
@@ -207,8 +208,8 @@ class CryptoFormatter(GenericDataFormatter):
     """Returns fixed model parameters for experiments."""
 
     fixed_params = {
-        'total_time_steps': 252 + 5,
-        'num_encoder_steps': 252,
+        'total_time_steps': 10 + 5,  # 252 + 5,
+        'num_encoder_steps': 10,  # 252,
         'num_epochs': 1,
         'early_stopping_patience': 5,
         'multiprocessing_workers': 5,

@@ -93,6 +93,8 @@ def main(expt_name,
     train, valid, test = data_formatter.split_data(raw_data)
     train_samples, valid_samples = data_formatter.get_num_samples_for_calibration()
 
+    id_to_weight = raw_data.groupby('Asset_ID')['Weight'].mean().to_dict()
+
     # Sets up default params
     fixed_params = data_formatter.get_experiment_params()
     params = data_formatter.get_default_model_params()
@@ -160,6 +162,22 @@ def main(expt_name,
         p50_forecast = data_formatter.format_predictions(output_map["p50"])
         p90_forecast = data_formatter.format_predictions(output_map["p90"])
 
+        weights = np.vectorize(id_to_weight.get)(targets.identifier.values)
+
+        def weighted_mean(y, weights):
+            return np.sum(weights * y) / np.sum(weights)
+
+        def weighted_cov(x, y, weights):
+            x_w_mean = weighted_mean(x, weights)
+            y_w_mean = weighted_mean(y, weights)
+            return np.sum(weights * (x - x_w_mean) * (y - y_w_mean)) / np.sum(weights)
+
+        def weighted_corr(x, y, weights):
+            return weighted_cov(x, y, weights) / np.sqrt(weighted_cov(x, x, weights) * weighted_cov(y, y, weights))
+
+        main_score = weighted_corr(targets['t+0'].values, p50_forecast['t+0'].values, weights)
+
+
         def extract_numerical_data(data):
             """Strips out forecast time and identifier columns."""
             return data[[
@@ -185,6 +203,7 @@ def main(expt_name,
     print()
     print("Normalised Quantile Loss for Test Data: P50={}, P90={}".format(
         p50_loss.mean(), p90_loss.mean()))
+    print("Weighted correlation score = {}".format(main_score))
 
 
 if __name__ == "__main__":

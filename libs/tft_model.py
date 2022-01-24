@@ -475,7 +475,10 @@ class TemporalFusionTransformer(object):
             print('# {} = {}'.format(k, params[k]))
 
         # Build model
+        print('*** Building model... ***')
         self.model = self.build_model()
+        print('*** Model has been built ***')
+
 
     def get_tft_embeddings(self, all_inputs):
         """Transforms raw inputs to embeddings.
@@ -1047,7 +1050,7 @@ class TemporalFusionTransformer(object):
 
             model = tf.keras.Model(inputs=all_inputs, outputs=outputs)
 
-            print(model.summary())
+            # print(model.summary())
 
             valid_quantiles = self.quantiles
             output_size = self.output_size
