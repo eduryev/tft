@@ -224,8 +224,13 @@ def download_crypto(config):
 #         ]  # ignore timezones, we don't need them
   idx = df.index
   dates = pd.to_datetime(idx, unit='s')
+  min_date = dates.min()
   df['date'] = dates
-  df['days_from_start'] = (dates - pd.to_datetime(df.index.min(), unit='s')).days
+  df['days_from_start'] = (dates - min_date).days
+  df['hours_from_start'] = (dates - min_date).days*24 + (dates - min_date).seconds//3600
+  df['hour_of_day'] = (dates - min_date).seconds // 3600
+  df['minute_of_day'] = (dates - min_date).seconds // 60
+  df['minute_of_hour'] = df['minute_of_day'] - df['hour_of_day']*60
   df['day_of_week'] = dates.dayofweek
   df['day_of_month'] = dates.day
   df['week_of_year'] = dates.weekofyear

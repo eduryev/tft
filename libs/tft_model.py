@@ -725,7 +725,6 @@ class TemporalFusionTransformer(object):
             if time_steps >= lags:
                 return np.stack(
                     [x[i:time_steps - (lags - 1) + i, :] for i in range(lags)], axis=1)
-
             else:
                 return None
         print('Getting id_col for batch...')
@@ -734,11 +733,7 @@ class TemporalFusionTransformer(object):
         time_col = self._get_single_col_by_type(InputTypes.TIME)
         print('Getting target_col for batch...')
         target_col = self._get_single_col_by_type(InputTypes.TARGET)
-        input_cols = [
-            tup[0]
-            for tup in self.column_definition
-            if tup[2] not in {InputTypes.ID, InputTypes.TIME}
-        ]
+        input_cols = [tup[0] for tup in self.column_definition if tup[2] not in {InputTypes.ID, InputTypes.TIME}]
 
         data_map = {}
         for _, sliced in data.groupby(id_col):
@@ -750,18 +745,17 @@ class TemporalFusionTransformer(object):
                 'inputs': input_cols
             }
 
-            for k in col_mappings:
-                cols = col_mappings[k]
+            for col_mapping_key, cols in col_mappings.items():
                 arr = _batch_single_entity(sliced[cols].copy())
 
-                if k not in data_map:
-                    data_map[k] = [arr]
+                if col_mapping_key not in data_map:
+                    data_map[col_mapping_key] = [arr]
                 else:
-                    data_map[k].append(arr)
+                    data_map[col_mapping_key].append(arr)
 
         # Combine all data
-        for k in data_map:
-            data_map[k] = np.concatenate(data_map[k], axis=0)
+        for col_mapping_key in data_map:
+            data_map[col_mapping_key] = np.concatenate(data_map[col_mapping_key], axis=0)
 
         # Shorten target so we only get decoder steps
         data_map['outputs'] = data_map['outputs'][:, self.num_encoder_steps:, :]
