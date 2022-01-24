@@ -56,7 +56,7 @@ def pre_process_raw_data(raw_data):
 
     assets_df_list = []
     for asset_id, asset_name in zip(asset_details.Asset_ID, asset_details.Asset_Name):
-        asset = raw_data[raw_data["Asset_ID"] == asset_id]
+        asset = raw_data[raw_data["Asset_ID"] == asset_id].set_index('timestamp')
         asset = asset.reindex(range(asset.index[0], asset.index[-1] + 60, 60), method='pad')
         asset_log_ret = log_return(asset.Close.fillna(0), 15).fillna(0)
         asset['log_return'] = asset_log_ret
@@ -104,7 +104,7 @@ def main(expt_name,
     print("*** Training from defined parameters for {} ***".format(expt_name))
 
     print("Loading & splitting data...")
-    raw_data = pd.read_csv(data_csv_path, index_col=0)
+    raw_data = pd.read_csv(data_csv_path)
     raw_data = pre_process_raw_data(raw_data)
     with pd.option_context('mode.use_inf_as_null', True):
         raw_data = raw_data.dropna()
