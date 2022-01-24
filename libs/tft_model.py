@@ -728,9 +728,11 @@ class TemporalFusionTransformer(object):
 
             else:
                 return None
-
+        print('Getting id_col for batch...')
         id_col = self._get_single_col_by_type(InputTypes.ID)
+        print('Getting time_col for batch...')
         time_col = self._get_single_col_by_type(InputTypes.TIME)
+        print('Getting target_col for batch...')
         target_col = self._get_single_col_by_type(InputTypes.TARGET)
         input_cols = [
             tup[0]

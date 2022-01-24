@@ -69,9 +69,9 @@ class CryptoFormatter(GenericDataFormatter):
   def split_data(self,
                  df,
                 start_boundary=0,
-                valid_boundary=1000,
-                test_boundary=1150,
-                end_boundary=1358):
+                valid_boundary=1,
+                test_boundary=2,
+                end_boundary=3):
     """Splits data frame into training-validation-test data frames.
     
     There are 1358 days of data in total. 1000 of them is used for train,
