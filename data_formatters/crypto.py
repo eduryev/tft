@@ -48,6 +48,7 @@ class CryptoFormatter(GenericDataFormatter):
       ('Close', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
       ('Volume', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
       ('VWAP', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
+      ('Weight', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
       ('days_from_start', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
       ('day_of_week', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
       ('day_of_month', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
