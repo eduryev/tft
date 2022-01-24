@@ -1201,6 +1201,28 @@ class TemporalFusionTransformer(object):
 
         return metrics[eval_metric]
 
+    def compute_correlation_score(self, data, data_formatter, id_to_weight):
+        output_map = self.predict(data, return_targets=True)
+        targets = data_formatter.format_predictions(output_map["targets"])
+        p50_forecast = data_formatter.format_predictions(output_map["p50"])
+
+        weights = np.vectorize(id_to_weight.get)(targets.identifier.values)
+
+        def weighted_mean(y, weights):
+            return np.sum(weights * y) / np.sum(weights)
+
+        def weighted_cov(x, y, weights):
+            x_w_mean = weighted_mean(x, weights)
+            y_w_mean = weighted_mean(y, weights)
+            return np.sum(weights * (x - x_w_mean) * (y - y_w_mean)) / np.sum(weights)
+
+        def weighted_corr(x, y, weights):
+            return weighted_cov(x, y, weights) / np.sqrt(weighted_cov(x, x, weights) * weighted_cov(y, y, weights))
+
+        corr_score = weighted_corr(targets['t+0'].values, p50_forecast['t+0'].values, weights)
+
+        return corr_score
+
     def predict(self, df, return_targets=False):
         """Computes predictions for a given input dataset.
 

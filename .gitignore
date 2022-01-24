@@ -1,7 +1,8 @@
 /venv/
 .idea/
 output/
-__pycache__
+*__pycache__*
+*ipynb_checkpoints*
 notebooks/
 train/
 .DS_Store
