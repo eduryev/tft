@@ -138,7 +138,7 @@ def main(expt_name,
             if val_loss < best_loss:
                 opt_manager.update_score(params, val_loss, model)
                 best_loss = val_loss
-                model.save(model_folder)
+                model.save(os.path.join(model_folder, 'manual'))
 
             tf.keras.backend.set_session(default_keras_session)
 
