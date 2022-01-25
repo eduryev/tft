@@ -196,9 +196,14 @@ class CryptoFormatter(GenericDataFormatter):
     print(f'Transforming inputs for real valued columns...')
     transformed_inputs = self._real_scalers.transform(df[real_inputs].values)
     print(f'Transformed inputs shape is: {transformed_inputs.shape}')
-    trunc_step = 1000
+    print(f'Dataframe index: {df.index}')
+    start_idx = df.index.min()
+    num_chunks = 20
+    trunc_step = len(df) // num_chunks
     for i in range(0, len(df), trunc_step):
-        df.loc[trunc_step*i: trunc_step*(i+1), real_inputs] = transformed_inputs[trunc_step*i: trunc_step*(i+1)]
+        print(f'Processing chunk: {i // trunc_step} out of {num_chunks}')
+        df.loc[start_idx + trunc_step * i: start_idx + min(len(df), trunc_step * (i + 1)) - 1, real_inputs] = \
+            transformed_inputs[trunc_step * i: min(len(df), trunc_step * (i + 1))]
     print("Real valued inputs are transformed.")
     # Format categorical inputs
     for col in categorical_inputs:
@@ -217,7 +222,7 @@ class CryptoFormatter(GenericDataFormatter):
     Returns:
       Data frame of unnormalised predictions.
     """
-    output = predictions.copy()
+    output = predictions  #.copy()
 
     column_names = predictions.columns
 
