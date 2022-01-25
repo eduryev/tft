@@ -134,6 +134,7 @@ class CryptoFormatter(GenericDataFormatter):
     print(f"Target scaler is fit on dataframe shape: {df[[target_column]].values.shape}")
     self._target_scaler = sklearn.preprocessing.StandardScaler().fit(
         df[[target_column]].values)  # used for predictions
+    print(f"Target scaler fitting is finished.")
 
     # Format categorical scalers
     categorical_inputs = utils.extract_cols_from_data_type(
@@ -145,8 +146,10 @@ class CryptoFormatter(GenericDataFormatter):
     for col in categorical_inputs:
       # Set all to str so that we don't have mixed integer/string columns
       srs = df[col].apply(str)
+      print(f"Categorical scaler is fit for column: {col}")
       categorical_scalers[col] = sklearn.preprocessing.LabelEncoder().fit(
           srs.values)
+      print(f"Categorical scaler fitting is finished.")
       num_classes.append(srs.nunique())
 
     # Set categorical scaler outputs
