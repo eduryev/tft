@@ -98,10 +98,10 @@ class CryptoFormatter(GenericDataFormatter):
 
     print('Formatting train-valid-test splits.')
 
-    index = df.loc[:, 'days_from_start']
-    train = df.loc[(index >= start_boundary) & (index < valid_boundary), :]
-    valid = df.loc[(index >= valid_boundary) & (index < test_boundary), :]
-    test = df.loc[(index >= test_boundary) & (index < end_boundary), :]
+    index = df['days_from_start']
+    train = df[(index >= start_boundary) & (index < valid_boundary)]
+    valid = df[(index >= valid_boundary) & (index < test_boundary)]
+    test = df[(index >= test_boundary) & (index < end_boundary)]
 
     self.set_scalers(train)
 
@@ -194,13 +194,13 @@ class CryptoFormatter(GenericDataFormatter):
 
     # Format real inputs
     print(f'Transforming inputs for real valued columns...')
-    df.loc[:, real_inputs] = self._real_scalers.transform(df.loc[:, real_inputs].values)
+    df[real_inputs] = self._real_scalers.transform(df[real_inputs].values)
     print("Real valued inputs are transformed.")
     # Format categorical inputs
     for col in categorical_inputs:
       print(f'Transforming input of {col}...')
-      string_df = df.loc[:, col].apply(str)
-      df.loc[:, col] = self._cat_scalers[col].transform(string_df)
+      string_df = df[col].apply(str)
+      df[col] = self._cat_scalers[col].transform(string_df)
 
     return df
 
