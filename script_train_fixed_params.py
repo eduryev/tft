@@ -85,16 +85,18 @@ def main(expt_name,
 
     print("*** Training from defined parameters for {} ***".format(expt_name))
 
-    print("Loading & splitting data...")
+    print("** Loading & splitting data... **")
     raw_data = pd.read_csv(data_csv_path)
     # with pd.option_context('mode.use_inf_as_null', True):
     #     raw_data = raw_data.dropna()
     raw_data.replace({'week_of_year': {53: 52}}, inplace=True)
     train, valid, test = data_formatter.split_data(raw_data)
     train_samples, valid_samples = data_formatter.get_num_samples_for_calibration()
+    print("** Data loading & splitting is finished. **")
 
     id_to_weight = raw_data.groupby('Asset_ID')['Weight'].mean().to_dict()
 
+    print("** Setting parameters... **")
     # Sets up default params
     fixed_params = data_formatter.get_experiment_params()
     params = data_formatter.get_default_model_params()
@@ -112,6 +114,7 @@ def main(expt_name,
             train_samples = testing_mode_params["train_samples"]
         if "valid_samples" in testing_mode_params:
             valid_samples = testing_mode_params["valid_samples"]
+    print("** Parameters have been set. **")
 
     # Sets up hyperparam manager
     print("*** Loading hyperparm manager ***")

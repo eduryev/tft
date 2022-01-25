@@ -105,7 +105,17 @@ class CryptoFormatter(GenericDataFormatter):
 
     self.set_scalers(train)
 
-    return (self.transform_inputs(data) for data in [train, valid, test])
+    print("Transforming inputs for train...")
+    train = self.transform_inputs(train)
+    print("Train input transforming is finished.")
+    print("Transforming inputs for valid...")
+    valid = self.transform_inputs(valid)
+    print("Valid input transforming is finished.")
+    print("Transforming inputs for test...")
+    test = self.transform_inputs(test)
+    print("Test input transforming is finished.")
+
+    return train, valid, test
 
   def set_scalers(self, df):
     """Calibrates scalers using the data supplied.
