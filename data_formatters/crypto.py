@@ -178,7 +178,7 @@ class CryptoFormatter(GenericDataFormatter):
       Transformed data frame.
 
     """
-    output = df.copy()
+    # output = df.copy()
 
     if self._real_scalers is None and self._cat_scalers is None:
       raise ValueError('Scalers have not been set!')
@@ -193,15 +193,15 @@ class CryptoFormatter(GenericDataFormatter):
         {InputTypes.ID, InputTypes.TIME})
 
     # Format real inputs
-    output[real_inputs] = self._real_scalers.transform(df[real_inputs].values)
+    df[real_inputs] = self._real_scalers.transform(df[real_inputs].values)
 
     # Format categorical inputs
     for col in categorical_inputs:
       print(f'Transforming input of {col}...')
       string_df = df[col].apply(str)
-      output[col] = self._cat_scalers[col].transform(string_df)
+      df[col] = self._cat_scalers[col].transform(string_df)
 
-    return output
+    return df
 
   def format_predictions(self, predictions):
     """Reverts any normalisation to give predictions in original scale.
