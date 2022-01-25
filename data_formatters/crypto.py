@@ -215,9 +215,9 @@ class CryptoFormatter(GenericDataFormatter):
     """Returns fixed model parameters for experiments."""
 
     fixed_params = {
-        'total_time_steps': 288 + 1,  # 252 + 5,
-        'num_encoder_steps': 288,  # 252,
-        'num_epochs': 50,
+        'total_time_steps': 5 + 1,  # 252 + 5,
+        'num_encoder_steps': 5,  # 252,
+        'num_epochs': 1,
         'early_stopping_patience': 5,
         'multiprocessing_workers': 5,
     }
@@ -229,7 +229,7 @@ class CryptoFormatter(GenericDataFormatter):
 
     model_params = {
         'dropout_rate': 0.3,
-        'hidden_layer_size': 160,
+        'hidden_layer_size': 80,
         'learning_rate': 0.01,
         'minibatch_size': 64,
         'max_gradient_norm': 0.01,
