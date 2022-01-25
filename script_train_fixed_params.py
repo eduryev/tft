@@ -210,7 +210,7 @@ def main(expt_name,
         tf.keras.backend.set_session(default_keras_session)
 
     print("Training completed @ {}".format(dte.datetime.now()))
-    print("Best validation loss = {}".format(val_loss))
+    # print("Best validation loss = {}".format(val_loss))
     print("Params:")
 
     for k in best_params:
