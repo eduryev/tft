@@ -57,7 +57,7 @@ class CryptoFormatter(GenericDataFormatter):
       ('minute_of_hour', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
       ('day_of_week', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
       ('day_of_month', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
-      ('week_of_year', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      # ('week_of_year', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
       ('year', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
       ('month', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
       ('categorical_id', DataTypes.CATEGORICAL, InputTypes.STATIC_INPUT)
@@ -131,7 +131,7 @@ class CryptoFormatter(GenericDataFormatter):
 
     data = df[real_inputs].values
     self._real_scalers = sklearn.preprocessing.StandardScaler().fit(data)
-    print(f"Target scaled is fit on dataframe shape: {df[[target_column]].values.shape}")
+    print(f"Target scaler is fit on dataframe shape: {df[[target_column]].values.shape}")
     self._target_scaler = sklearn.preprocessing.StandardScaler().fit(
         df[[target_column]].values)  # used for predictions
 
