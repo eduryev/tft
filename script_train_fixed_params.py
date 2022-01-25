@@ -53,7 +53,7 @@ def main(expt_name,
          model_folder,
          data_csv_path,
          data_formatter,
-         use_testing_mode=False):
+         testing_mode_params=None):
     """Trains tft based on defined model params.
 
     Args:
@@ -63,7 +63,7 @@ def main(expt_name,
       data_csv_path: Path to csv file containing data
       data_formatter: Dataset-specific data fromatter (see
         expt_settings.dataformatter.GenericDataFormatter)
-      use_testing_mode: Uses a smaller models and data sizes for testing purposes
+      testing_mode_params: Uses a smaller models and data sizes for testing purposes
         only -- switch to False to use original default settings
     """
 
@@ -101,10 +101,17 @@ def main(expt_name,
     params["model_folder"] = model_folder
 
     # Parameter overrides for testing only! Small sizes used to speed up script.
-    if use_testing_mode:
-        fixed_params["num_epochs"] = 1
-        params["hidden_layer_size"] = 5
-        train_samples, valid_samples = 100, 10
+    if testing_mode_params:
+        for param in fixed_params:
+            if param in testing_mode_params:
+                fixed_params[param] = testing_mode_params[param]
+        for param in params:
+            if param in testing_mode_params:
+                params[param] = testing_mode_params[param]
+        if "train_samples" in testing_mode_params:
+            train_samples = testing_mode_params["train_samples"]
+        if "valid_samples" in testing_mode_params:
+            valid_samples = testing_mode_params["valid_samples"]
 
     # Sets up hyperparam manager
     print("*** Loading hyperparm manager ***")
@@ -258,4 +265,4 @@ if __name__ == "__main__":
         model_folder=os.path.join(config.model_folder, "fixed"),
         data_csv_path=config.data_csv_path,
         data_formatter=formatter,
-        use_testing_mode=True)  # Change to false to use original default params
+        testing_mode_params=True)  # Change to false to use original default params

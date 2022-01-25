@@ -721,7 +721,7 @@ class TemporalFusionTransformer(object):
         """
 
         # Functions.
-        def _batch_single_entity(input_data):
+        def generate_lagged_features(input_data):
             time_steps = len(input_data)
             lags = self.time_steps
             x = input_data.values
@@ -749,7 +749,9 @@ class TemporalFusionTransformer(object):
             }
 
             for col_mapping_key, cols in col_mappings.items():
-                arr = _batch_single_entity(sliced[cols].copy())
+                print("Generating lagged features...")
+                arr = generate_lagged_features(sliced[cols])  #.copy())
+                print("Lagged features are generated.")
 
                 if col_mapping_key not in data_map:
                     data_map[col_mapping_key] = [arr]
@@ -1125,13 +1127,17 @@ class TemporalFusionTransformer(object):
             print('Using cached training data')
             train_data = TFTDataCache.get('train')
         else:
+            print("Generating batched_data for training...")
             train_data = self._batch_data(train_df)
+            print("Batch data for training is generated.")
 
         if valid_df is None:
             print('Using cached validation data')
             valid_data = TFTDataCache.get('valid')
         else:
+            print("Generating batched_data for validation...")
             valid_data = self._batch_data(valid_df)
+            print("Batch data for validation is generated.")
 
         print('Using keras standard fit')
 
@@ -1184,7 +1190,9 @@ class TemporalFusionTransformer(object):
             print('Using cached validation data')
             raw_data = TFTDataCache.get('valid')
         else:
+            print("Generating batched_data for evaluation...")
             raw_data = self._batch_data(data)
+            print("Batch data for evaluation is generated.")
 
         inputs = raw_data['inputs']
         outputs = raw_data['outputs']
@@ -1235,7 +1243,9 @@ class TemporalFusionTransformer(object):
           Input dataframe or tuple of (input dataframe, algined output dataframe).
         """
 
+        print("Generating batch data for predictions...")
         data = self._batch_data(df)
+        print("Batch data generated.")
 
         inputs = data['inputs']
         time = data['time']
