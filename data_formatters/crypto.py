@@ -194,7 +194,7 @@ class CryptoFormatter(GenericDataFormatter):
 
     # Format real inputs
     print(f'Transforming inputs for real valued columns...')
-    df[real_inputs] = self._real_scalers.transform(df[real_inputs].values)
+    df.loc[:, real_inputs] = self._real_scalers.transform(df[real_inputs].values)
     print("Real valued inputs are transformed.")
     # Format categorical inputs
     for col in categorical_inputs:
