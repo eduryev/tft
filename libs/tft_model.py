@@ -749,9 +749,7 @@ class TemporalFusionTransformer(object):
             }
 
             for col_mapping_key, cols in col_mappings.items():
-                print("Generating lagged features...")
                 arr = generate_lagged_features(sliced[cols])  #.copy())
-                print("Lagged features are generated.")
 
                 if col_mapping_key not in data_map:
                     data_map[col_mapping_key] = [arr]

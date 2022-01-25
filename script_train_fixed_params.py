@@ -163,14 +163,19 @@ def main(expt_name,
 
         model.load(opt_manager.hyperparam_folder)
 
-        print("Computing best validation loss")
+        print("*** Computing best validation loss ***")
         val_loss = model.evaluate(valid)
 
-        print("Computing test loss")
+        print("*** Computing test loss ***")
+        print("** Generating model predictions... **")
         output_map = model.predict(test, return_targets=True)
+        print("** Model predictions are generated. **")
+
+        print("** Formatting predictions... **")
         targets = data_formatter.format_predictions(output_map["targets"])
         p50_forecast = data_formatter.format_predictions(output_map["p50"])
         p90_forecast = data_formatter.format_predictions(output_map["p90"])
+        print("** Predictions formatting is finished. **")
 
         weights = np.vectorize(id_to_weight.get)(targets.identifier.values)
 
