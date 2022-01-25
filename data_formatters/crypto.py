@@ -99,9 +99,9 @@ class CryptoFormatter(GenericDataFormatter):
     print('Formatting train-valid-test splits.')
 
     index = df['days_from_start']
-    train = df.loc[(index >= start_boundary) & (index < valid_boundary)]
-    valid = df.loc[(index >= valid_boundary) & (index < test_boundary)]
-    test = df.loc[(index >= test_boundary) & (index < end_boundary)]
+    train = df.loc[(index >= start_boundary) & (index < valid_boundary), :]
+    valid = df.loc[(index >= valid_boundary) & (index < test_boundary), :]
+    test = df.loc[(index >= test_boundary) & (index < end_boundary), :]
 
     self.set_scalers(train)
 
