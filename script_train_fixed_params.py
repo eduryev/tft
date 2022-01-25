@@ -163,8 +163,8 @@ def main(expt_name,
 
         model.load(opt_manager.hyperparam_folder)
 
-        print("*** Computing best validation loss ***")
-        val_loss = model.evaluate(valid)
+        print("*** NOT Computing best validation loss ***")
+        # val_loss = model.evaluate(valid)
 
         print("*** Computing test loss ***")
         print("** Generating model predictions... **")

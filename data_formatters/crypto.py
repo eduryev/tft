@@ -222,7 +222,7 @@ class CryptoFormatter(GenericDataFormatter):
     Returns:
       Data frame of unnormalised predictions.
     """
-    output = predictions  #.copy()
+    output = predictions.copy()
 
     column_names = predictions.columns
 
