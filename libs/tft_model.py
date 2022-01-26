@@ -721,7 +721,7 @@ class TemporalFusionTransformer(object):
         """
 
         # Functions.
-        def generate_lagged_features(input_data):
+        def _batch_single_asset(input_data):
             time_steps = len(input_data)
             lags = self.time_steps
             x = input_data.values
@@ -750,7 +750,7 @@ class TemporalFusionTransformer(object):
 
             print(f'Generating lagged features for asset: {asset_id}')
             for col_mapping_key, cols in col_mappings.items():
-                arr = generate_lagged_features(sliced[cols])  #.copy())
+                arr = _batch_single_asset(sliced[cols])  #.copy())
 
                 if col_mapping_key not in data_map:
                     data_map[col_mapping_key] = [arr]
@@ -1119,7 +1119,8 @@ class TemporalFusionTransformer(object):
                 monitor='val_loss',
                 save_best_only=True,
                 save_weights_only=True),
-            tf.keras.callbacks.TerminateOnNaN()
+            tf.keras.callbacks.TerminateOnNaN(),
+            tf.keras.callbacks.CSVLogger('output/results/crypto/train_logs.csv')
         ]
 
         print('Fit: Getting batched_data')

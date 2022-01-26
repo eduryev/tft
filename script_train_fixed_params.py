@@ -67,15 +67,13 @@ def main(expt_name,
         only -- switch to False to use original default settings
     """
 
-    num_repeats = 1
-
     if not isinstance(data_formatter, data_formatters.base.GenericDataFormatter):
         raise ValueError(
             "Data formatters should inherit from" +
             "AbstractDataFormatter! Type={}".format(type(data_formatter)))
 
     # Tensorflow setup
-    default_keras_session = tf.keras.backend.get_session()
+    default_keras_session = tf.compat.v1.keras.backend.get_session()
 
     if use_gpu:
         tf_config = utils.get_default_tensorflow_config(tf_device="gpu", gpu_id=0)
@@ -127,46 +125,29 @@ def main(expt_name,
     for k in params:
         print("{}: {}".format(k, params[k]))
 
-    best_loss = np.Inf
-    for _ in range(num_repeats):
+    results_dict = pd.DataFrame(columns=['val_loss', 'correlation_score', 'p50_loss', 'p90_loss'])
 
-        tf.reset_default_graph()
-        with tf.Graph().as_default(), tf.Session(config=tf_config) as sess:
-
-            tf.keras.backend.set_session(sess)
-
-            params = opt_manager.get_next_parameters()
-            model = ModelClass(params, use_cudnn=use_gpu)
-
-            if not model.training_data_cached():
-                model.cache_batched_data(train, "train", num_samples=train_samples)
-                model.cache_batched_data(valid, "valid", num_samples=valid_samples)
-
-            sess.run(tf.global_variables_initializer())
-            model.fit()
-
-            val_loss = model.evaluate()
-
-            if val_loss < best_loss:
-                opt_manager.update_score(params, val_loss, model)
-                best_loss = val_loss
-                model.save(os.path.join(model_folder, 'manual'))
-
-            tf.keras.backend.set_session(default_keras_session)
-
-    print("*** Running tests ***")
     tf.reset_default_graph()
     with tf.Graph().as_default(), tf.Session(config=tf_config) as sess:
+
         tf.keras.backend.set_session(sess)
-        best_params = opt_manager.get_best_params()
-        model = ModelClass(best_params, use_cudnn=use_gpu)
 
-        model.load(opt_manager.hyperparam_folder)
+        print("*** Running training ***")
+        params = opt_manager.get_next_parameters()
+        model = ModelClass(params, use_cudnn=use_gpu)
 
-        print("*** NOT Computing best validation loss ***")
-        # val_loss = model.evaluate(valid)
+        if not model.training_data_cached():
+            model.cache_batched_data(train, "train", num_samples=train_samples)
+            model.cache_batched_data(valid, "valid", num_samples=valid_samples)
 
-        print("*** Computing test loss ***")
+        sess.run(tf.global_variables_initializer())
+        model.fit()
+
+        print("*** Running validation ***")
+        val_loss = model.evaluate()
+
+        print("*** Running tests ***")
+
         print("** Generating model predictions... **")
         output_map = model.predict(test, return_targets=True)
         print("** Model predictions are generated. **")
@@ -190,8 +171,6 @@ def main(expt_name,
         def weighted_corr(x, y, weights):
             return weighted_cov(x, y, weights) / np.sqrt(weighted_cov(x, x, weights) * weighted_cov(y, y, weights))
 
-        main_score = weighted_corr(targets['t+0'].values, p50_forecast['t+0'].values, weights)
-
 
         def extract_numerical_data(data):
             """Strips out forecast time and identifier columns."""
@@ -199,6 +178,8 @@ def main(expt_name,
                 col for col in data.columns
                 if col not in {"forecast_time", "identifier"}
             ]]
+
+        correlation_score = weighted_corr(targets['t+0'].values, p50_forecast['t+0'].values, weights)
 
         p50_loss = utils.numpy_normalised_quantile_loss(
             extract_numerical_data(targets), extract_numerical_data(p50_forecast),
@@ -209,16 +190,28 @@ def main(expt_name,
 
         tf.keras.backend.set_session(default_keras_session)
 
-    print("Training completed @ {}".format(dte.datetime.now()))
-    # print("Best validation loss = {}".format(val_loss))
-    print("Params:")
+    results_path = 'output/results/crypto/results.csv'
+    results_dict = params.copy()
+    results_dict["val_loss"] = val_loss
+    results_dict["correlation_score"] = correlation_score
+    results_dict["p50_loss"] = p50_loss
+    results_dict["p90_loss"] = p90_loss
+    if os.path.exists(results_path):
+        results_df = pd.read_csv(results_path)
+    else:
+        results_df = pd.DataFrame(columns=list(results_dict.keys()))
+    results_df = results_df.append(results_dict, ignore_index=True)
+    results_df.to_csv(results_path)
 
-    for k in best_params:
-        print(k, " = ", best_params[k])
+    print("Training completed @ {}".format(dte.datetime.now()))
+    print("Best validation loss = {}".format(val_loss))
+    # print("Params:")
+    # for k in best_params:
+    #     print(k, " = ", best_params[k])
     print()
     print("Normalised Quantile Loss for Test Data: P50={}, P90={}".format(
         p50_loss.mean(), p90_loss.mean()))
-    print("Weighted correlation score = {}".format(main_score))
+    print("Weighted correlation score = {}".format(correlation_score))
 
 
 if __name__ == "__main__":
