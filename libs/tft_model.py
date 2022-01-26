@@ -739,7 +739,7 @@ class TemporalFusionTransformer(object):
         input_cols = [tup[0] for tup in self.column_definition if tup[2] not in {InputTypes.ID, InputTypes.TIME}]
 
         data_map = {}
-        for _, sliced in data.groupby(id_col):
+        for asset_id, sliced in data.groupby(id_col):
 
             col_mappings = {
                 'identifier': [id_col],
@@ -748,7 +748,7 @@ class TemporalFusionTransformer(object):
                 'inputs': input_cols
             }
 
-            print('Generating lagged features...')
+            print(f'Generating lagged features for asset: {asset_id}')
             for col_mapping_key, cols in col_mappings.items():
                 arr = generate_lagged_features(sliced[cols])  #.copy())
 
