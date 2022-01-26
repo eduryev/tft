@@ -196,7 +196,6 @@ class CryptoFormatter(GenericDataFormatter):
     print(f'Transforming inputs for real valued columns...')
     transformed_inputs = self._real_scalers.transform(df[real_inputs].values)
     print(f'Transformed inputs shape is: {transformed_inputs.shape}')
-    print(f'Dataframe index: {df.index}')
     start_idx = df.index.min()
     num_chunks = 20
     trunc_step = len(df) // num_chunks
