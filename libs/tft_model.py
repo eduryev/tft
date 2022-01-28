@@ -673,7 +673,8 @@ class TemporalFusionTransformer(object):
             #         len(valid_sampling_locations), max_samples, replace=False)
             # ]
             print('--Randomly allocating subsample...')
-            ranges = list(np.random.choice(valid_sampling_locations, max_samples, replace=False))
+            idx = np.random.choice(np.arange(len(valid_sampling_locations)), max_samples, replace=False)
+            ranges = np.array(valid_sampling_locations)[idx]
             print('--Randomization is finished')
         else:
             print('Max samples={} exceeds # available segments={}'.format(
