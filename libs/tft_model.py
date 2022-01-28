@@ -668,10 +668,13 @@ class TemporalFusionTransformer(object):
 
         if max_samples > 0 and len(valid_sampling_locations) > max_samples:
             print('Extracting {} samples...'.format(max_samples))
-            ranges = [
-                valid_sampling_locations[i] for i in np.random.choice(
-                    len(valid_sampling_locations), max_samples, replace=False)
-            ]
+            # ranges = [
+            #     valid_sampling_locations[i] for i in np.random.choice(
+            #         len(valid_sampling_locations), max_samples, replace=False)
+            # ]
+            print('--Randomly allocating subsample...')
+            ranges = np.random.choice(valid_sampling_locations, max_samples, replace=False)
+            print('--Randomization is finished')
         else:
             print('Max samples={} exceeds # available segments={}'.format(
                 max_samples, len(valid_sampling_locations)))
