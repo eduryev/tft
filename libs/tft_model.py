@@ -35,6 +35,8 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
+from tqdm.notebook import tqdm
+
 # Layer definitions.
 concat = tf.keras.backend.concatenate
 stack = tf.keras.backend.stack
@@ -668,14 +670,14 @@ class TemporalFusionTransformer(object):
 
         if max_samples > 0 and len(valid_sampling_locations) > max_samples:
             print('Extracting {} samples...'.format(max_samples))
-            # ranges = [
-            #     valid_sampling_locations[i] for i in np.random.choice(
-            #         len(valid_sampling_locations), max_samples, replace=False)
-            # ]
             print('--Randomly allocating subsample...')
-            idx = np.random.choice(np.arange(len(valid_sampling_locations)), max_samples, replace=False)
-            ranges = np.array(valid_sampling_locations)[idx]
-            print('--Randomization is finished')
+            ranges = [
+                valid_sampling_locations[i] for i in np.random.choice(
+                    len(valid_sampling_locations), max_samples, replace=False)
+            ]
+            # idx = np.random.choice(np.arange(len(valid_sampling_locations)), max_samples, replace=False)
+            # ranges = np.array(valid_sampling_locations)[idx]
+            print('--Randomization is finished.')
         else:
             print('Max samples={} exceeds # available segments={}'.format(
                 max_samples, len(valid_sampling_locations)))
@@ -690,8 +692,9 @@ class TemporalFusionTransformer(object):
             if tup[2] not in {InputTypes.ID, InputTypes.TIME}
         ]
 
+        print('--Processing samples...')
         for i, tup in enumerate(ranges):
-            if (i + 1 % 1000) == 0:
+            if ((i + 1) % 1000) == 0:
                 print(i + 1, 'of', max_samples, 'samples done...')
             identifier, start_idx = tup
             sliced = split_data_map[identifier].iloc[start_idx -
@@ -700,6 +703,7 @@ class TemporalFusionTransformer(object):
             outputs[i, :, :] = sliced[[target_col]]
             time[i, :, 0] = sliced[time_col]
             identifiers[i, :, 0] = sliced[id_col]
+        print('--Sample processing is finished.')
 
         sampled_data = {
             'inputs': inputs,
