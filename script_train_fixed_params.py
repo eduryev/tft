@@ -88,9 +88,10 @@ def main(expt_name,
 
     print("** Loading & splitting data... **")
     start_time = time()
-    raw_data = dd.read_csv(data_csv_path)
-    raw_data = raw_data.compute()
-    raw_data.sort_index(inplace=True)
+    # raw_data = dd.read_csv(data_csv_path)
+    # raw_data = raw_data.compute()
+    # raw_data.sort_index(inplace=True)
+    raw_data = pd.read_csv(data_csv_path)
     end_time = time()
     print(f"Loaded raw data in {end_time - start_time:.2f}s")
     # with pd.option_context('mode.use_inf_as_null', True):
