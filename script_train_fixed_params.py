@@ -125,8 +125,6 @@ def main(expt_name,
     for k in params:
         print("{}: {}".format(k, params[k]))
 
-    results_dict = pd.DataFrame(columns=['val_loss', 'correlation_score', 'p50_loss', 'p90_loss'])
-
     tf.reset_default_graph()
     with tf.Graph().as_default(), tf.Session(config=tf_config) as sess:
 
@@ -192,6 +190,7 @@ def main(expt_name,
 
     results_path = 'output/results/crypto/results.csv'
     results_dict = params.copy()
+    del results_dict['column_definition']
     results_dict["val_loss"] = val_loss
     results_dict["correlation_score"] = correlation_score
     results_dict["p50_loss"] = p50_loss
