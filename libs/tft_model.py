@@ -34,9 +34,9 @@ import libs.utils as utils
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from multiprocessing import Pool
 
-from tqdm.notebook import tqdm
+# from multiprocessing import Pool
+# from tqdm.notebook import tqdm
 
 # Layer definitions.
 concat = tf.keras.backend.concatenate
@@ -694,20 +694,9 @@ class TemporalFusionTransformer(object):
         ]
 
         print('--Processing samples...')
-        pool = Pool(os.cpu_count())  # Create a multiprocessing Pool
-        def process_ranges(i, tup):
-            if ((i + 1) % 5000) == 0:
-                print(i + 1, 'of', max_samples, 'samples done...')
-            identifier, start_idx = tup
-            sliced = split_data_map[identifier].iloc[start_idx -
-                                                     self.time_steps:start_idx]
-            inputs[i, :, :] = sliced[input_cols]
-            outputs[i, :, :] = sliced[[target_col]]
-            time[i, :, 0] = sliced[time_col]
-            identifiers[i, :, 0] = sliced[id_col]
-
-        pool.map(process_ranges, enumerate(ranges))
-        # for i, tup in enumerate(ranges):
+        ## Former attempt to parallelize the for loop
+        # pool = Pool(os.cpu_count())  # Create a multiprocessing Pool
+        # def process_ranges(i, tup):
         #     if ((i + 1) % 5000) == 0:
         #         print(i + 1, 'of', max_samples, 'samples done...')
         #     identifier, start_idx = tup
@@ -717,6 +706,18 @@ class TemporalFusionTransformer(object):
         #     outputs[i, :, :] = sliced[[target_col]]
         #     time[i, :, 0] = sliced[time_col]
         #     identifiers[i, :, 0] = sliced[id_col]
+        #
+        # pool.map(process_ranges, enumerate(ranges))
+        for i, tup in enumerate(ranges):
+            if ((i + 1) % 5000) == 0:
+                print(i + 1, 'of', max_samples, 'samples done...')
+            identifier, start_idx = tup
+            sliced = split_data_map[identifier].iloc[start_idx -
+                                                     self.time_steps:start_idx]
+            inputs[i, :, :] = sliced[input_cols]
+            outputs[i, :, :] = sliced[[target_col]]
+            time[i, :, 0] = sliced[time_col]
+            identifiers[i, :, 0] = sliced[id_col]
         print('--Sample processing is finished.')
 
         sampled_data = {

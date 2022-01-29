@@ -42,6 +42,9 @@ import numpy as np
 import pandas as pd
 import tensorflow.compat.v1 as tf
 
+import dask.dataframe as dd
+from time import time
+
 ExperimentConfig = expt_settings.configs.ExperimentConfig
 HyperparamOptManager = libs.hyperparam_opt.HyperparamOptManager
 ModelClass = libs.tft_model.TemporalFusionTransformer
@@ -84,10 +87,16 @@ def main(expt_name,
     print("*** Training from defined parameters for {} ***".format(expt_name))
 
     print("** Loading & splitting data... **")
-    raw_data = pd.read_csv(data_csv_path)
+    start_time = time()
+    raw_data = dd.read_csv(data_csv_path)
+    raw_data = raw_data.compute()
+    end_time = time()
+    print(f"Loaded raw data in {end_time - start_time:.2f}s")
+
     # with pd.option_context('mode.use_inf_as_null', True):
     #     raw_data = raw_data.dropna()
     raw_data.replace({'week_of_year': {53: 52}}, inplace=True)
+
     train, valid, test = data_formatter.split_data(raw_data)
     train_samples, valid_samples = data_formatter.get_num_samples_for_calibration()
     print("** Data loading & splitting is finished. **")
