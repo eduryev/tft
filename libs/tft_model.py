@@ -697,6 +697,7 @@ class TemporalFusionTransformer(object):
         ]
 
         print('--Processing samples...')
+        start_time = timing()
         for i, tup in enumerate(ranges):
             if ((i + 1) % 1000) == 0:
                 print(i + 1, 'of', max_samples, 'samples done...')
@@ -707,7 +708,8 @@ class TemporalFusionTransformer(object):
             outputs[i, :, :] = sliced[[target_col]]
             time[i, :, 0] = sliced[time_col]
             identifiers[i, :, 0] = sliced[id_col]
-        print('--Sample processing is finished.')
+        end_time = timing()
+        print(f"--Sample processing is finished in {end_time - start_time:.2f}s")
 
         sampled_data = {
             'inputs': inputs,
@@ -1244,7 +1246,7 @@ class TemporalFusionTransformer(object):
 
         return corr_score
 
-    def predict(self, df, return_targets=False):
+    def predict(self, df=None, return_targets=False):
         """Computes predictions for a given input dataset.
 
         Args:
@@ -1255,10 +1257,13 @@ class TemporalFusionTransformer(object):
         Returns:
           Input dataframe or tuple of (input dataframe, algined output dataframe).
         """
-
-        print("Predict: Generating batch data for predictions...")
-        data = self._batch_data(df)
-        print("Predict: Batch data generated.")
+        if df is None:
+            print('Predict: Using cached validation data')
+            data = TFTDataCache.get('valid')
+        else:
+            print("Predict: Generating batch data for predictions...")
+            data = self._batch_data(df)
+            print("Predict: Batch data generated.")
 
         inputs = data['inputs']
         time = data['time']

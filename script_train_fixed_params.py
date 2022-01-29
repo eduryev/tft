@@ -97,7 +97,7 @@ def main(expt_name,
     # with pd.option_context('mode.use_inf_as_null', True):
     #     raw_data = raw_data.dropna()
     raw_data.replace({'week_of_year': {53: 52}}, inplace=True)
-    train, valid, test = data_formatter.split_data(raw_data)
+    train, valid, _ = data_formatter.split_data(raw_data)
     train_samples, valid_samples = data_formatter.get_num_samples_for_calibration()
     print("** Data loading & splitting is finished. **")
 
@@ -156,7 +156,7 @@ def main(expt_name,
         print("*** Running tests ***")
 
         print("** Generating model predictions... **")
-        output_map = model.predict(test, return_targets=True)
+        output_map = model.predict(return_targets=True)
         print("** Model predictions are generated. **")
 
         print("** Formatting predictions... **")
@@ -217,7 +217,7 @@ def main(expt_name,
     # for k in best_params:
     #     print(k, " = ", best_params[k])
     print()
-    print("Normalised Quantile Loss for Test Data: P50={}, P90={}".format(
+    print("Normalised Quantile Loss for Validation Data: P50={}, P90={}".format(
         p50_loss.mean(), p90_loss.mean()))
     print("Weighted correlation score = {}".format(correlation_score))
 
