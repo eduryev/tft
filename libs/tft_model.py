@@ -35,6 +35,8 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
+from time import time
+
 from tqdm.notebook import tqdm
 
 # Layer definitions.
@@ -650,6 +652,7 @@ class TemporalFusionTransformer(object):
 
         data.sort_values(by=[id_col, time_col], inplace=True)
 
+        start_time = time()
         print('Getting valid sampling locations.')
         valid_sampling_locations = []
         split_data_map = {}
@@ -662,7 +665,8 @@ class TemporalFusionTransformer(object):
                     for i in range(num_entries - self.time_steps + 1)
                 ]
             split_data_map[identifier] = df
-
+        end_time = time()
+        print(f"Got valid sampling locations in {end_time - start_time:.2f}s")
         inputs = np.zeros((max_samples, self.time_steps, self.input_size))
         outputs = np.zeros((max_samples, self.time_steps, self.output_size))
         time = np.empty((max_samples, self.time_steps, 1), dtype=object)
