@@ -720,7 +720,7 @@ class TemporalFusionTransformer(object):
             'active_entries': np.ones_like(outputs[:, self.num_encoder_steps:, :]),
             'time': time,
             'identifier': identifiers,
-            'weights': weights
+            'weights': weights[:, self.num_encoder_steps:, :]
         }
 
         return sampled_data

@@ -107,12 +107,18 @@ class CryptoFormatter(GenericDataFormatter):
 
     print("Transforming inputs for train...")
     train = self.transform_inputs(train)
+    train['Target'] = train.sort_values('timestamp').groupby('Asset_ID')['Target'].shift(-1)
+    train.dropna(inplace=True)
     print("Train input transforming is finished.")
     print("Transforming inputs for valid...")
     valid = self.transform_inputs(valid)
+    valid['Target'] = valid.sort_values('timestamp').groupby('Asset_ID')['Target'].shift(-1)
+    valid.dropna(inplace=True)
     print("Valid input transforming is finished.")
     print("Transforming inputs for test...")
     test = self.transform_inputs(test)
+    test['Target'] = test.sort_values('timestamp').groupby('Asset_ID')['Target'].shift(-1)
+    test.dropna(inplace=True)
     print("Test input transforming is finished.")
 
     return train, valid, test
