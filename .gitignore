@@ -1,6 +1,7 @@
 /venv/
 .idea/
 output/
+output_test/
 **/__pycache__
 **ipynb_checkpoints
 notebooks/

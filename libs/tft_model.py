@@ -671,6 +671,7 @@ class TemporalFusionTransformer(object):
         outputs = np.zeros((max_samples, self.time_steps, self.output_size))
         time = np.empty((max_samples, self.time_steps, 1), dtype=object)
         identifiers = np.empty((max_samples, self.time_steps, 1), dtype=object)
+        weights = np.zeros((max_samples, self.time_steps, self.output_size))
 
         if max_samples > 0 and len(valid_sampling_locations) > max_samples:
             print('Extracting {} samples...'.format(max_samples))
@@ -693,8 +694,9 @@ class TemporalFusionTransformer(object):
         input_cols = [
             tup[0]
             for tup in self.column_definition
-            if tup[2] not in {InputTypes.ID, InputTypes.TIME}
+            if tup[2] not in {InputTypes.ID, InputTypes.TIME, InputTypes.TARGET}
         ]
+        weight_col = self._get_single_col_by_type(InputTypes.STATIC_INPUT)
 
         print('--Processing samples...')
         start_time = timing()
@@ -708,6 +710,7 @@ class TemporalFusionTransformer(object):
             outputs[i, :, :] = sliced[[target_col]]
             time[i, :, 0] = sliced[time_col]
             identifiers[i, :, 0] = sliced[id_col]
+            weights[i, :, :] = sliced[[weight_col]]
         end_time = timing()
         print(f"--Sample processing is finished in {end_time - start_time:.2f}s")
 
@@ -716,7 +719,8 @@ class TemporalFusionTransformer(object):
             'outputs': outputs[:, self.num_encoder_steps:, :],
             'active_entries': np.ones_like(outputs[:, self.num_encoder_steps:, :]),
             'time': time,
-            'identifier': identifiers
+            'identifier': identifiers,
+            'weights': weights
         }
 
         return sampled_data
@@ -750,7 +754,8 @@ class TemporalFusionTransformer(object):
         time_col = self._get_single_col_by_type(InputTypes.TIME)
         print('Getting target_col for batch...')
         target_col = self._get_single_col_by_type(InputTypes.TARGET)
-        input_cols = [tup[0] for tup in self.column_definition if tup[2] not in {InputTypes.ID, InputTypes.TIME}]
+        input_cols = [tup[0] for tup in self.column_definition if tup[2] not in {InputTypes.ID, InputTypes.TIME, InputTypes.TARGET}]
+        weight_col = self._get_single_col_by_type(InputTypes.STATIC_INPUT)
 
         data_map = {}
         for asset_id, sliced in data.groupby(id_col):
@@ -759,7 +764,8 @@ class TemporalFusionTransformer(object):
                 'identifier': [id_col],
                 'time': [time_col],
                 'outputs': [target_col],
-                'inputs': input_cols
+                'inputs': input_cols,
+                'weights': [weight_col]
             }
 
             print(f'Generating lagged features for asset: {asset_id}')
@@ -778,6 +784,7 @@ class TemporalFusionTransformer(object):
 
         # Shorten target so we only get decoder steps
         data_map['outputs'] = data_map['outputs'][:, self.num_encoder_steps:, :]
+        data_map['weights'] = data_map['weights'][:, self.num_encoder_steps:, :]
 
         active_entries = np.ones_like(data_map['outputs'])
         if 'active_entries' not in data_map:
@@ -1158,23 +1165,24 @@ class TemporalFusionTransformer(object):
 
         def _unpack(data):
             return data['inputs'], data['outputs'], \
-                   self._get_active_locations(data['active_entries'])
+                   self._get_active_locations(data['active_entries']), data['weights']
 
         # Unpack without sample weights
-        data, labels, active_flags = _unpack(train_data)
-        val_data, val_labels, val_flags = _unpack(valid_data)
+        data, labels, active_flags, weights = _unpack(train_data)
+        val_data, val_labels, val_flags, val_weights = _unpack(valid_data)
+
 
         all_callbacks = callbacks
 
         self.model.fit(
             x=data,
             y=np.concatenate([labels, labels, labels], axis=-1),
-            sample_weight=active_flags,
+            sample_weight=active_flags*weights.reshape(-1, 1),
             epochs=self.num_epochs,
             batch_size=self.minibatch_size,
             validation_data=(val_data,
                              np.concatenate([val_labels, val_labels, val_labels],
-                                            axis=-1), val_flags),
+                                            axis=-1), val_flags*val_weights.reshape(-1, 1)),
             callbacks=all_callbacks,
             shuffle=True,
             use_multiprocessing=True,

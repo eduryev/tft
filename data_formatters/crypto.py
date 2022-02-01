@@ -49,18 +49,18 @@ class CryptoFormatter(GenericDataFormatter):
       ('Volume', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
       ('VWAP', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
       ('log_return', DataTypes.REAL_VALUED, InputTypes.OBSERVED_INPUT),
-      ('Weight', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
       ('days_from_start', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
       ('hours_from_start', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
-      ('hour_of_day', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
-      ('minute_of_day', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
-      ('minute_of_hour', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
-      ('day_of_week', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
-      ('day_of_month', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
-      ('week_of_year', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      # ('hour_of_day', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      # ('minute_of_day', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      # ('minute_of_hour', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      # ('day_of_week', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      # ('day_of_month', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
+      # ('week_of_year', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
       ('year', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
       ('month', DataTypes.CATEGORICAL, InputTypes.KNOWN_INPUT),
-      ('categorical_id', DataTypes.CATEGORICAL, InputTypes.STATIC_INPUT)
+      # ('categorical_id', DataTypes.CATEGORICAL, InputTypes.STATIC_INPUT),
+      ('Weight', DataTypes.REAL_VALUED, InputTypes.STATIC_INPUT),
   ]
 
   def __init__(self):
@@ -75,9 +75,9 @@ class CryptoFormatter(GenericDataFormatter):
   def split_data(self,
                  df,
                  start_boundary=0,
-                 valid_boundary=1158,
-                 test_boundary=1258,
-                 end_boundary=1358):
+                 valid_boundary=10,#1158,
+                 test_boundary=20,#1258,
+                 end_boundary=30): #1358):
     """Splits data frame into training-validation-test data frames.
     
     There are 1358 days of data in total.
@@ -98,7 +98,7 @@ class CryptoFormatter(GenericDataFormatter):
 
     print('Formatting train-valid-test splits.')
 
-    index = df['days_from_start']
+    index = df['hours_from_start']
     train = df[(index >= start_boundary) & (index < valid_boundary)]
     valid = df[(index >= valid_boundary) & (index < test_boundary)]
     test = df[(index >= test_boundary) & (index < end_boundary)]
@@ -193,17 +193,18 @@ class CryptoFormatter(GenericDataFormatter):
         {InputTypes.ID, InputTypes.TIME})
 
     # Format real inputs
-    print(f'Transforming inputs for real valued columns...')
-    transformed_inputs = self._real_scalers.transform(df[real_inputs].values)
-    print(f'Transformed inputs shape is: {transformed_inputs.shape}')
-    start_idx = df.index.min()
-    num_chunks = 20
-    trunc_step = len(df) // num_chunks
-    for i in range(0, len(df), trunc_step):
-        print(f'Processing chunk: {i // trunc_step} out of {num_chunks}')
-        df.loc[start_idx + trunc_step * i: start_idx + min(len(df), trunc_step * (i + 1)) - 1, real_inputs] = \
-            transformed_inputs[trunc_step * i: min(len(df), trunc_step * (i + 1))]
-    print("Real valued inputs are transformed.")
+    df[real_inputs] = self._real_scalers.transform(df[real_inputs].values)
+    # print(f'Transforming inputs for real valued columns...')
+    # transformed_inputs = self._real_scalers.transform(df[real_inputs].values)
+    # print(f'Transformed inputs shape is: {transformed_inputs.shape}')
+    # start_idx = df.index.min()
+    # num_chunks = 20
+    # trunc_step = len(df) // num_chunks
+    # for i in range(0, len(df), trunc_step):
+    #     print(f'Processing chunk: {i // trunc_step} out of {num_chunks}')
+    #     df.loc[start_idx + trunc_step * i: start_idx + min(len(df), trunc_step * (i + 1)) - 1, real_inputs] = \
+    #         transformed_inputs[trunc_step * i: min(len(df), trunc_step * (i + 1))]
+    # print("Real valued inputs are transformed.")
     # Format categorical inputs
     for col in categorical_inputs:
       print(f'Transforming input of {col}...')

@@ -146,26 +146,28 @@ class GenericDataFormatter(abc.ABC):
 
     _check_single_column(InputTypes.ID)
     _check_single_column(InputTypes.TIME)
+    _check_single_column(InputTypes.TARGET)
 
     identifier = [tup for tup in column_definition if tup[2] == InputTypes.ID]
     time = [tup for tup in column_definition if tup[2] == InputTypes.TIME]
     real_inputs = [
         tup for tup in column_definition if tup[1] == DataTypes.REAL_VALUED and
-        tup[2] not in {InputTypes.ID, InputTypes.TIME}
+        tup[2] not in {InputTypes.ID, InputTypes.TIME, InputTypes.TARGET}
     ]
     categorical_inputs = [
         tup for tup in column_definition if tup[1] == DataTypes.CATEGORICAL and
         tup[2] not in {InputTypes.ID, InputTypes.TIME}
     ]
+    target = [tup for tup in column_definition if tup[2] == InputTypes.TARGET]
 
-    return identifier + time + real_inputs + categorical_inputs
+    return identifier + time + real_inputs + categorical_inputs + target
 
   def _get_input_columns(self):
     """Returns names of all input columns."""
     return [
         tup[0]
         for tup in self.get_column_definition()
-        if tup[2] not in {InputTypes.ID, InputTypes.TIME}
+        if tup[2] not in {InputTypes.ID, InputTypes.TIME, InputTypes.TARGET}
     ]
 
   def _get_tft_input_indices(self):
@@ -175,7 +177,7 @@ class GenericDataFormatter(abc.ABC):
     def _extract_tuples_from_data_type(data_type, defn):
       return [
           tup for tup in defn if tup[1] == data_type and
-          tup[2] not in {InputTypes.ID, InputTypes.TIME}
+          tup[2] not in {InputTypes.ID, InputTypes.TIME, InputTypes.TARGET}
       ]
 
     def _get_locations(input_types, defn):
@@ -200,7 +202,7 @@ class GenericDataFormatter(abc.ABC):
         'category_counts':
             self.num_classes_per_cat_input,
         'input_obs_loc':
-            _get_locations({InputTypes.TARGET}, column_definition),
+            _get_locations({InputTypes.OBSERVED_INPUT}, column_definition),
         'static_input_loc':
             _get_locations({InputTypes.STATIC_INPUT}, column_definition),
         'known_regular_inputs':
